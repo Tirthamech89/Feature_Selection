@@ -1,0 +1,19 @@
+library(Boruta)
+library(plyr)
+library(dplyr)
+
+
+#After missing value Imputation
+chk<-train_all[1:1000,]
+set.seed(123)
+boruta_t<-Boruta(renewal~.,data=chk,doTrace=2)
+print(boruta_t)
+plot(boruta_t,xlab='"',xaxt="n")
+lz<-lapply(1:ncol(boruta_t$ImpHistory),function(i) boruta_t$ImpHistory[is.finite(boruta_t$ImpHistory[,i]),i])
+names(lz)<-colnames(boruta_t$ImpHistory)
+labels<-sort(sapply(lz, median))
+axis(side=1,las=2,labels = names(labels),at=1:ncol(boruta_t$ImpHistory),cex.axis=0.7)
+final_boruta<-TentativeRoughFix(boruta_t)
+print(final_boruta)
+getSelectedAttributes(final_boruta,withTentative=F)
+boruta_imp<-attStats(final_boruta)
