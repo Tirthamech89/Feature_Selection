@@ -1,0 +1,24 @@
+library(randomForest)
+library(caret)
+
+dropevent<- names(train_new) %in% c('stroke') 
+x <- train_new[!dropevent]
+varNames <- names(x)
+varNames1 <- paste(varNames, collapse = "+")
+rf.form <- as.formula(paste("stroke", varNames1, sep = " ~ "))
+
+cross.sell.rf <- randomForest(rf.form,
+                              train_new, 
+                              mtry=10, 
+                              ntree=100, 
+                              importance=T, 
+                              do.trace=T,
+                              nodesize=10,
+                              seed=123876)
+
+
+var.imp<-data.frame(cross.sell.rf$importance)
+varImpPlot(cross.sell.rf,type=2,n=50)#Top 50
+var.imp$variables<-row.names(var.imp)
+#Arranging variables in descending order of importance
+var.imp.tab<-var.imp[order(-var.imp$MeanDecreaseGini),]
